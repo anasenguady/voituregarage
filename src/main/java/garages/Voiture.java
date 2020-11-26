@@ -7,6 +7,7 @@ public class Voiture {
 
 	private final String immatriculation;
 	private final List<Stationnement> myStationnements = new LinkedList<>();
+        private final Set<Garage> myGarages = new HashSet<>();
 
 	public Voiture(String i) {
 		if (null == i) {
@@ -29,8 +30,14 @@ public class Voiture {
 	 */
 	public void entreAuGarage(Garage g) throws Exception {
 		// Et si la voiture est déjà dans un garage ?
-		Stationnement s = new Stationnement(this, g);
-		myStationnements.add(s);
+                if (estDansUnGarage()) { // Si la voiture est déjà dans un garage : Exception
+                    throw new Exception("La voiture est déjà dans un garage");
+                }
+                else {
+                    Stationnement s = new Stationnement(this, g);
+                    myStationnements.add(s);
+                    myGarages.add(g);
+                }
 	}
 
 	/**
@@ -40,27 +47,33 @@ public class Voiture {
 	 * @throws java.lang.Exception si la voiture n'est pas dans un garage
 	 */
 	public void sortDuGarage() throws Exception {
-		throw new UnsupportedOperationException("Pas encore implémenté");
-		// TODO: Implémenter cette méthode
 		// Trouver le dernier stationnement de la voiture
 		// Terminer ce stationnement
+                if (!estDansUnGarage()) { // Si la voiture n'est pas dans un garage : Exception
+                    throw new Exception("La voiture n'est pas dans un garage");
+                }
+                else {
+                    Stationnement dernierStationnement = myStationnements.get(myStationnements.size() - 1);
+                    dernierStationnement.terminer();
+                }
 	}
 
 	/**
 	 * @return l'ensemble des garages visités par cette voiture
 	 */
 	public Set<Garage> garagesVisites() {
-		// TODO: Implémenter cette méthode
-		throw new UnsupportedOperationException("Pas encore implémenté");
+                return myGarages;
 	}
 
 	/**
 	 * @return vrai si la voiture est dans un garage, faux sinon
 	 */
 	public boolean estDansUnGarage() {
-		// TODO: Implémenter cette méthode
-		throw new UnsupportedOperationException("Pas encore implémenté");
-		// Vrai si le dernier stationnement est en cours
+                if (myStationnements.size() > 0) {
+                    Stationnement dernierStationnement = myStationnements.get(myStationnements.size() - 1);
+                    return (dernierStationnement.estEnCours());
+                }
+                return false;
 	}
 
 	/**
@@ -78,8 +91,29 @@ public class Voiture {
 	 * @param out l'endroit où imprimer (ex: System.out)
 	 */
 	public void imprimeStationnements(PrintStream out) {
-		// TODO: Implémenter cette méthode
-		throw new UnsupportedOperationException("Pas encore implémenté");
-	}
+                // we creat Hashmap for stationnement
+                HashMap<Garage, List<Stationnement>> hashMap = new HashMap<>();
+                
+                myStationnements.stream().forEach((stationnement) -> {
+                    
+               if (!hashMap.containsKey(stationnement.getGarage())) {
+                        List<Stationnement> list = new ArrayList<>();
+                        list.add(stationnement);
+
+                        hashMap.put(stationnement.getGarage(), list);
+                
+                    } 
+                    else { 
+                        hashMap.get(stationnement.getGarage()).add(stationnement);
+                    }
+                });
+                
+                
+                garagesVisites().stream().forEach((garage) -> {
+                    
+                    out.println(garage);
+                    out.println(hashMap.get(garage));
+                });
+        }
 
 }
